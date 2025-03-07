@@ -23,7 +23,7 @@ jobs:
       - name: Install Dependencies
         run: pip install -r src/requirements.txt  # Ensure your dependencies are listed
 
-      - name: Run Tests with Make
+      - name: Run Pytest with make
         run: make test
 
 
@@ -52,8 +52,6 @@ jobs:
         name: gitleaks-results
         path: gitleaks-results.sarif
 
-
-
   bandit_sast_scan:
     name: bandit_sast_scan
     needs: test
@@ -80,6 +78,22 @@ jobs:
       with:
         name: bandit-findings
         path: bandit-report.json
+
+  sonarqube:
+    name: bandit_sast_scan
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          
+      - name: SonarQube Cloud Scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
 
      
