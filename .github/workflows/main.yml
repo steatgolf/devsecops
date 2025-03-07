@@ -17,18 +17,18 @@ jobs:
       uses: gitleaks/gitleaks-action@v2.3.4
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
-      with:
-        config-path: ""  # Leave empty for default rules
-        report-format: sarif
-        report-path: gitleaks-results.sarif
-        fail: true 
+    #   with:
+    #     config-path: ""  # Leave empty for default rules
+    #     report-format: sarif
+    #     report-path: gitleaks-results.sarif
+    #     fail: true 
 
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4.6.1
-      if: always()
-      with:
-        name: gitleaks-results
-        path: gitleaks-results.sarif
+    # - name: Upload Artifact
+    #   uses: actions/upload-artifact@v4.6.1
+    #   if: always()
+    #   with:
+    #     name: gitleaks-results
+    #     path: gitleaks-results.sarif
 
 
 
