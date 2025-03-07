@@ -19,16 +19,16 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
       with:
         config-path: ""  # Leave empty for default rules
-        report-format: json
-        report-path: gitleaks-report.json
+        report-format: sarif
+        report-path: gitleaks-results.sarif
         fail: true 
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4.6.1
       if: always()
       with:
-        name: gitleaks-report
-        path: gitleaks-report.json
+        name: gitleaks-results
+        path: gitleaks-results.sarif
 
 
 
