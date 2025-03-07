@@ -3,28 +3,59 @@ name: CI
 on: [push]
 
 jobs:
- sast_scan:
-   name: Run Bandit Scan
-   runs-on: ubuntu-latest
+  Gitleaks_secret_scan:
+    name: gitleaks
+    runs-on: ubuntu-latest
 
-   steps:
-   - name: Checkout code
-     uses: actions/checkout@v4.2.2
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4.2.2
+      with:
+        fetch-depth: 0
 
-   - name: Set up Python
-     uses: actions/setup-python@v5.4.0
-     with:
-       python-version: 3.13
+    - name: gitleaks scan
+      uses: gitleaks/gitleaks-action@v2.3.4
+      with:
+        config-path: ""  # Leave empty for default rules
+        report-format: json
+        report-path: gitleaks-report.json
+        fail: true 
 
-   - name: Install Bandit
-     run: pip install bandit
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4.6.1
+      if: always()
+      with:
+        report-format: json
+        report-path: gitleaks-report.json
 
-   - name: Run Bandit Scan
-     run: bandit -ll -ii -r . -f json -o bandit-report.json
 
-   - name: Upload Artifact
-     uses: actions/upload-artifact@v4.6.1
-     if: always()
-     with:
-      name: bandit-findings
-      path: bandit-report.json
+
+  bandit_sast_scan:
+    name: Run Bandit Scan
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4.2.2
+
+    - name: Set up Python
+      uses: actions/setup-python@v5.4.0
+      with:
+        python-version: 3.13
+
+    - name: Install Bandit
+      run: pip install bandit
+
+    - name: Run Bandit Scan
+      run: bandit -ll -ii -r . -f json -o bandit-report.json
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4.6.1
+      if: always()
+      with:
+        name: bandit-findings
+        path: bandit-report.json
+
+
+     
+  
