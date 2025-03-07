@@ -15,6 +15,8 @@ jobs:
 
     - name: gitleaks scan
       uses: gitleaks/gitleaks-action@v2.3.4
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
       with:
         config-path: ""  # Leave empty for default rules
         report-format: json
