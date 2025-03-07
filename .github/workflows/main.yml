@@ -3,8 +3,34 @@ name: CI
 on: [push]
 
 jobs:
-  Gitleaks_secret_scan:
+
+  test:
+    name: Run Pytest
+    runs-on: ubuntu-latest  # Use Ubuntu runner
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4.2.2
+
+      - name: Install Make
+        run: sudo apt-get update && sudo apt-get install -y make
+
+      - name: Set up Python
+        uses: actions/setup-python@v5.4.0
+        with:
+          python-version: 3.13
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt  # Ensure your dependencies are listed
+
+      - name: Run Tests with Make
+        run: make test
+
+
+
+  gitleaks_secret_scan:
     name: gitleaks
+    needs: test
     runs-on: ubuntu-latest
 
     steps:
@@ -19,12 +45,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITLEAKS_ENABLE_UPLOAD_ARTIFACT: true
 
-    #   with:
-    #     config-path: ""  # Leave empty for default rules
-    #     report-format: sarif
-    #     report-path: gitleaks-results.sarif
-    #     fail: true 
-
     - name: Upload Artifact
       uses: actions/upload-artifact@v4.6.1
       if: always()
@@ -36,6 +56,7 @@ jobs:
 
   bandit_sast_scan:
     name: Run Bandit Scan
+    needs: test
     runs-on: ubuntu-latest
 
     steps:
