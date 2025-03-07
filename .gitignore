@@ -1,0 +1,80 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+env/
+venv/
+ENV/
+.env
+build/
+dist/
+eggs/
+.eggs-info/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+*.egg-info/
+.installed.txt
+*.whl
+*.exe
+*.pth
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+*.log.*
+*.sql
+
+# Environments (e.g. conda)
+.conda
+conda-env/
+environment.yml
+environment.lock.json
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb.bak
+
+# pyenv
+.python-version
+
+# mypy
+.mypy_cache/
+
+# Sphinx documentation
+docs/_build/
+
+# Poetry
+poetry.lock
+
+# pyinstaller
+build
+dist
+
+# OS or Editor related files
+.DS_Store
+.vscode/
+*.swp
+*~
+.idea/
+.project
+.classpath
+.c9/
+*.tmproj
+*.bak
+*.orig
+*.rej
