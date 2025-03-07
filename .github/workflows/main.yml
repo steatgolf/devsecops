@@ -14,9 +14,10 @@ jobs:
         fetch-depth: 0
 
     - name: gitleaks scan
-      uses: gitleaks/gitleaks-action@v2.3.4
+      uses: gitleaks/gitleaks-action@v2.3.7
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITLEAKS_ENABLE_UPLOAD_ARTIFACT: false
     #   with:
     #     config-path: ""  # Leave empty for default rules
     #     report-format: sarif
