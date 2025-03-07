@@ -101,7 +101,27 @@ jobs:
       uses: SonarSource/sonarqube-scan-action@v5
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-
      
-  
+  build:
+    name: trivy_sca_scan
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4.2.2
+
+    - name: Run Trivy vulnerability scanner in fs mode
+      uses: aquasecurity/trivy-action@0.29.0
+      with:
+        scan-type: "fs"
+        output: trivy-report.json
+        format: json
+        scan-ref: .
+        exit-code: 0
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4.6.1
+      if: always()
+      with:
+        name: trivy-report
+        path: trivy-report.json
