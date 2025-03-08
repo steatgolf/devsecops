@@ -114,30 +114,49 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5.4.0
         with:
-          python-version: 3.12
+          python-version: 3.13
 
       - name: Install dependencies (if needed)
         run: |
           python -m pip install --upgrade pip
           pip install -r src/requirements.txt
-    
-      - uses: actions/checkout@master
 
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/python@master
-        continue-on-error: true # To make sure that SARIF upload gets called
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: |
-            args: --severity-threshold=high
-            --sarif-file-output=snyk-findings.sarif
-      - name: Upload Artifact
+      - name: Install Snyk CLI
+        run: npm install -g snyk
+
+      - name: Authenticate Snyk
+        run: snyk auth ${{ secrets.SNYK_TOKEN }}
+
+      - name: Run Snyk Test
+        run: |
+          snyk test --severity-threshold=high --json > snyk-report.json || true
+          # snyk test --json > snyk-report.json || true
+
+      - name: Upload Report as Artifact
         uses: actions/upload-artifact@v4.6.1
         if: always()
         with:
-          name: snyk-findings
-          path: snyk-findings.sarif
+          name: snyk-security-report
+          path: snyk-report.json
+
+    
+      # - uses: actions/checkout@master
+
+      # - name: Run Snyk to check for vulnerabilities
+      #   uses: snyk/actions/python@master
+      #   continue-on-error: true # To make sure that SARIF upload gets called
+      #   env:
+      #     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      #   with:
+      #     args: |
+      #       args: --severity-threshold=high
+      #       --sarif-file-output=snyk-findings.sarif
+      # - name: Upload Artifact
+      #   uses: actions/upload-artifact@v4.6.1
+      #   if: always()
+      #   with:
+      #     name: snyk-findings
+      #     path: snyk-findings.sarif
 
       # - name: Upload result to GitHub Code Scanning
       #   uses: github/codeql-action/upload-sarif@v3
