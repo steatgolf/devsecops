@@ -107,6 +107,20 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
+    
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+
+      - name: Set up Python
+        uses: actions/setup-python@v5.4.0
+        with:
+          python-version: 3.13
+
+      - name: Install dependencies (if needed)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r src/requirements.txt
+    
       - uses: actions/checkout@master
 
       - name: Run Snyk to check for vulnerabilities
@@ -116,9 +130,9 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: |
-            --sarif-file-output=snyk.sarif
             args: --severity-threshold=high
-
+            --sarif-file-output=snyk.sarif
+    
       - name: Upload result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v3
         with:
