@@ -101,27 +101,51 @@ jobs:
       uses: SonarSource/sonarqube-scan-action@v5
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-     
-  build:
-    name: trivy_sca_scan
+        
+  synk_sca_scan:
+    name: synk_sca_scan
     needs: test
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@master
 
-    - name: Run Trivy vulnerability scanner in fs mode
-      uses: aquasecurity/trivy-action@0.29.0
-      with:
-        scan-type: "fs"
-        output: trivy-report.json
-        format: json
-        scan-ref: .
-        exit-code: 0
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/python@master
+        continue-on-error: true # To make sure that SARIF upload gets called
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: |
+            --sarif-file-output=snyk.sarif
+            args: --severity-threshold=high
 
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4.6.1
-      if: always()
-      with:
-        name: trivy-report
-        path: trivy-report.json
+      - name: Upload result to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: snyk.sarif
+        if: always()
+
+    # build:
+  #   name: trivy_sca_scan
+  #   needs: test
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v4.2.2
+
+  #   - name: Run Trivy vulnerability scanner in fs mode
+  #     uses: aquasecurity/trivy-action@0.29.0
+  #     with:
+  #       scan-type: "fs"
+  #       output: trivy-report.json
+  #       format: json
+  #       severity: 'CRITICAL,HIGH'
+  #       scan-ref: .
+  #       exit-code: 0
+
+  #   - name: Upload Artifact
+  #     uses: actions/upload-artifact@v4.6.1
+  #     if: always()
+  #     with:
+  #       name: trivy-report
+  #       path: trivy-report.json
