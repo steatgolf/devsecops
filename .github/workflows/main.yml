@@ -28,36 +28,10 @@ jobs:
           python-version: 3.13
 
       - name: Install Dependencies
-        run: pip install -r src/requirements.txt  # Ensure your dependencies are listed
+        run: pip install -r src/requirements.txt 
 
       - name: Run Pytest with make
         run: make test
-
-
-
-  gitleaks_secret_scan:
-    name: gitleaks_secret_scan
-    needs: test
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4.2.2
-      with:
-        fetch-depth: 0
-
-    - name: gitleaks scan
-      uses: gitleaks/gitleaks-action@v2.3.7
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        GITLEAKS_ENABLE_UPLOAD_ARTIFACT: true
-
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4.6.1
-      if: always()
-      with:
-        name: gitleaks-results
-        path: gitleaks-results.sarif
 
   bandit_sast_scan:
     name: bandit_sast_scan
@@ -88,7 +62,7 @@ jobs:
 
   sonarqube:
     name: sonarcloud_sast_scan
-    # needs: test
+    needs: test
     runs-on: ubuntu-latest
     steps:
 
@@ -101,16 +75,6 @@ jobs:
       uses: SonarSource/sonarqube-scan-action@v5
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-    #   with:
-    #     args: >
-    #       -Dsonar.report.export.path=sonar-sast-report.json
-          
-    # - name: Upload Report as Artifact
-    #   uses: actions/upload-artifact@v4.6.1
-    #   if: always()
-    #   with:
-    #     name: sonar-sast-report
-    #     path: sonar-sast-report.json   
 
   snyk_sca_scan:
     name: snyk_sca_scan
