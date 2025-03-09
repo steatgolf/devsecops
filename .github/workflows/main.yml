@@ -102,7 +102,8 @@ jobs:
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       with:
-        args: Dsonar.report.export.path=sonar-sast-report.json
+        args: >
+          -Dsonar.report.export.path=sonar-report.json
 
   snyk_sca_scan:
     name: snyk_sca_scan
