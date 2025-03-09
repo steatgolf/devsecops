@@ -88,7 +88,7 @@ jobs:
 
   sonarqube:
     name: sonarcloud_sast_scan
-    # needs: test
+    needs: test
     runs-on: ubuntu-latest
     steps:
 
@@ -99,11 +99,13 @@ jobs:
 
     - name: SonarQube Cloud Scan
       uses: SonarSource/sonarqube-scan-action@v5
+      if: always()
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       with:
         args: >
-          -Dsonar.report.export.path=sonar-report.json
+          -Dsonar.report.export.path=sonar-sast-report.json
+      
 
   snyk_sca_scan:
     name: snyk_sca_scan
