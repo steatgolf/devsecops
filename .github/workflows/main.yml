@@ -11,100 +11,102 @@ on:
 
 jobs:
 
-  # test:
-  #   name: Unit test
-  #   runs-on: ubuntu-latest  # Use Ubuntu runner
+  test:
+    name: Unit test
+    runs-on: ubuntu-latest  
 
-  #   steps:
-  #     - name: Checkout Repository
-  #       uses: actions/checkout@v4.2.2
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4.2.2
 
-  #     - name: Install Make
-  #       run: sudo apt-get update && sudo apt-get install -y make
+      - name: Install Make
+        run: sudo apt-get update && sudo apt-get install -y make
 
-  #     - name: Set up Python
-  #       uses: actions/setup-python@v5.4.0
-  #       with:
-  #         python-version: 3.13
+      - name: Set up Python
+        uses: actions/setup-python@v5.4.0
+        with:
+          python-version: 3.13
 
-  #     - name: Install Dependencies
-  #       run: pip install -r src/requirements.txt  # Ensure your dependencies are listed
+      - name: Install Dependencies
+        run: pip install -r src/requirements.txt  # Ensure your dependencies are listed
 
-  #     - name: Run Pytest with make
-  #       run: make test
+      - name: Run Pytest with make
+        run: make test
 
 
 
-  # gitleaks_secret_scan:
-  #   name: gitleaks_secret_scan
-  #   needs: test
-  #   runs-on: ubuntu-latest
+  gitleaks_secret_scan:
+    name: gitleaks_secret_scan
+    needs: test
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #   - name: Checkout code
-  #     uses: actions/checkout@v4.2.2
-  #     with:
-  #       fetch-depth: 0
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4.2.2
+      with:
+        fetch-depth: 0
 
-  #   - name: gitleaks scan
-  #     uses: gitleaks/gitleaks-action@v2.3.7
-  #     env:
-  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       GITLEAKS_ENABLE_UPLOAD_ARTIFACT: true
+    - name: gitleaks scan
+      uses: gitleaks/gitleaks-action@v2.3.7
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITLEAKS_ENABLE_UPLOAD_ARTIFACT: true
 
-  #   - name: Upload Artifact
-  #     uses: actions/upload-artifact@v4.6.1
-  #     if: always()
-  #     with:
-  #       name: gitleaks-results
-  #       path: gitleaks-results.sarif
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4.6.1
+      if: always()
+      with:
+        name: gitleaks-results
+        path: gitleaks-results.sarif
 
-  # bandit_sast_scan:
-  #   name: bandit_sast_scan
-  #   needs: test
-  #   runs-on: ubuntu-latest
+  bandit_sast_scan:
+    name: bandit_sast_scan
+    needs: test
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #   - name: Checkout code
-  #     uses: actions/checkout@v4.2.2
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4.2.2
 
-  #   - name: Set up Python
-  #     uses: actions/setup-python@v5.4.0
-  #     with:
-  #       python-version: 3.13
+    - name: Set up Python
+      uses: actions/setup-python@v5.4.0
+      with:
+        python-version: 3.13
 
-  #   - name: Install Bandit
-  #     run: pip install bandit
+    - name: Install Bandit
+      run: pip install bandit
 
-  #   - name: Run Bandit Scan
-  #     run: bandit -ll -ii -r . -f json -o bandit-report.json
+    - name: Run Bandit Scan
+      run: bandit -ll -ii -r . -f json -o bandit-sast-report.json
 
-  #   - name: Upload Artifact
-  #     uses: actions/upload-artifact@v4.6.1
-  #     if: always()
-  #     with:
-  #       name: bandit-findings
-  #       path: bandit-report.json
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4.6.1
+      if: always()
+      with:
+        name: bandit-sast-report
+        path: bandit-sast-report.json
 
-  # sonarqube:
-  #   name: sonarcloud_sast_scan
-  #   needs: test
-  #   runs-on: ubuntu-latest
-  #   steps:
-
-  #   - name: Checkout code
-  #     uses: actions/checkout@v4.2.2
-  #     with:
-  #       fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-
-  #   - name: SonarQube Cloud Scan
-  #     uses: SonarSource/sonarqube-scan-action@v5
-  #     env:
-  #       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        
-  synk_sca_scan:
-    name: synk_sca_scan
+  sonarqube:
+    name: sonarcloud_sast_scan
     # needs: test
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout code
+      uses: actions/checkout@v4.2.2
+      with:
+        fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+    - name: SonarQube Cloud Scan
+      uses: SonarSource/sonarqube-scan-action@v5
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      with:
+        args: Dsonar.report.export.path=sonar-sast-report.json
+
+  snyk_sca_scan:
+    name: snyk_sca_scan
+    needs: test
     runs-on: ubuntu-latest
     steps:
     
@@ -126,61 +128,11 @@ jobs:
         run: snyk auth ${{ secrets.SNYK_TOKEN }}
 
       - name: Run Snyk Test
-        run: snyk test --file=src/requirements.txt --severity-threshold=high --json > snyk-report.json || true
+        run: snyk test --file=src/requirements.txt --severity-threshold=high --json > snyk-sca-report.json || true
 
       - name: Upload Report as Artifact
         uses: actions/upload-artifact@v4.6.1
         if: always()
         with:
-          name: snyk-report
-          path: snyk-report.json
-
-    
-      # - uses: actions/checkout@master
-
-      # - name: Run Snyk to check for vulnerabilities
-      #   uses: snyk/actions/python@master
-      #   continue-on-error: true # To make sure that SARIF upload gets called
-      #   env:
-      #     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      #   with:
-      #     args: |
-      #       args: --severity-threshold=high
-      #       --sarif-file-output=snyk-findings.sarif
-      # - name: Upload Artifact
-      #   uses: actions/upload-artifact@v4.6.1
-      #   if: always()
-      #   with:
-      #     name: snyk-findings
-      #     path: snyk-findings.sarif
-
-      # - name: Upload result to GitHub Code Scanning
-      #   uses: github/codeql-action/upload-sarif@v3
-      #   with:
-      #     sarif_file: snyk.sarif
-      #   if: always()
-
-    # build:
-  #   name: trivy_sca_scan
-  #   needs: test
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - name: Checkout code
-  #     uses: actions/checkout@v4.2.2
-
-  #   - name: Run Trivy vulnerability scanner in fs mode
-  #     uses: aquasecurity/trivy-action@0.29.0
-  #     with:
-  #       scan-type: "fs"
-  #       output: trivy-report.json
-  #       format: json
-  #       severity: 'CRITICAL,HIGH'
-  #       scan-ref: .
-  #       exit-code: 0
-
-  #   - name: Upload Artifact
-  #     uses: actions/upload-artifact@v4.6.1
-  #     if: always()
-  #     with:
-  #       name: trivy-report
-  #       path: trivy-report.json
+          name: snyk-sca-report
+          path: snyk-sca-report.json      
